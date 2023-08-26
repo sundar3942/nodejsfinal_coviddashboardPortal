@@ -36,12 +36,21 @@ let convertDBObject = (object) => {
 };
 let convertDBObject_district = (object) => {
   return {
+    districtId: object.district_id,
     districtName: object.district_name,
     stateId: object.state_id,
     cases: object.cases,
     cured: object.cured,
     active: object.active,
     deaths: object.deaths,
+  };
+};
+let convertDBObject_stats = (object) => {
+  return {
+    totalCases: object.totalCases,
+    totalCured: object.totalCured,
+    totalActive: object.totalActive,
+    totalDeaths: object.totalDeaths,
   };
 };
 app.post("/login/", async (request, response) => {
@@ -82,6 +91,7 @@ app.get("/states/", async (request, response) => {
   } else {
     jwt.verify(jwtToken, "secret_key", async (error, user) => {
       if (error) {
+        response.status(401);
         response.send("Invalid JWT Token");
       } else {
         const query = `
@@ -111,6 +121,7 @@ app.get("/states/:stateId/", async (request, response) => {
   } else {
     jwt.verify(jwtToken, "secret_key", async (error, user) => {
       if (error) {
+        response.status(401);
         response.send("Invalid JWT Token");
       } else {
         const { stateId } = request.params;
@@ -139,6 +150,7 @@ app.get("/districts/", async (request, response) => {
   } else {
     jwt.verify(jwtToken, "secret_key", async (error, user) => {
       if (error) {
+        response.status(401);
         response.send("Invalid JWT Token");
       } else {
         const query = `
@@ -167,6 +179,7 @@ app.get("/districts/:districtId/", async (request, response) => {
   } else {
     jwt.verify(jwtToken, "secret_key", async (error, user) => {
       if (error) {
+        response.status(401);
         response.send("Invalid JWT Token");
       } else {
         const { districtId } = request.params;
@@ -176,6 +189,135 @@ app.get("/districts/:districtId/", async (request, response) => {
     `;
         const dbResponse = await db.get(query);
         const converted = convertDBObject_district(dbResponse);
+        response.send(converted);
+      }
+    });
+  }
+});
+app.post("/districts/", async (request, response) => {
+  let jwtToken;
+  const authHeader = request.headers["authorization"];
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    jwt.verify(jwtToken, "secret_key", async (error, user) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        const districtDetails = request.body;
+        const {
+          districtName,
+          stateId,
+          cases,
+          cured,
+          active,
+          deaths,
+        } = districtDetails;
+        const postQuery = `INSERT INTO district (
+        district_name,state_id,cases,cured,active,deaths)
+        VALUES(
+           '${districtName}',${stateId},${cases},${cured},${active},${deaths}
+            );`;
+        const dbResponse = await db.run(postQuery);
+        response.send("District Successfully Added");
+      }
+    });
+  }
+});
+
+app.delete("/districts/:districtId/", async (request, response) => {
+  let jwtToken;
+  const authHeader = request.headers["authorization"];
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    jwt.verify(jwtToken, "secret_key", async (error, user) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        const { districtId } = request.params;
+        const deleteQuery = `
+    DELETE FROM
+      district
+    WHERE
+      district_id = ${districtId};`;
+        await db.run(deleteQuery);
+        response.send("District Removed");
+      }
+    });
+  }
+});
+
+app.put("/districts/:districtId/", async (request, response) => {
+  let jwtToken;
+  const authHeader = request.headers["authorization"];
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    const { districtId } = request.params;
+    const districtDetails = request.body;
+    const {
+      districtName,
+      stateId,
+      cases,
+      cured,
+      active,
+      deaths,
+    } = districtDetails;
+
+    const putQuery = `UPDATE district 
+    SET district_name = '${districtName}',
+    state_id = ${stateId},
+    cases = ${cases},
+    cured = ${cured},
+    active = ${active},
+    deaths = ${deaths}
+    
+    WHERE district_id = ${districtId}
+    `;
+    const dbResponse = await db.run(putQuery);
+    console.log(dbResponse);
+    response.send("District Details Updated");
+  }
+});
+
+app.get("/states/:stateId/stats/", async (request, response) => {
+  let jwtToken;
+  const authHeader = request.headers["authorization"];
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  console.log(jwtToken);
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid JWT Token");
+  } else {
+    jwt.verify(jwtToken, "secret_key", async (error, user) => {
+      if (error) {
+        response.status(401);
+        response.send("Invalid JWT Token");
+      } else {
+        const { stateId } = request.params;
+        const query = `
+        select sum(cases) as totalCases,sum(cured) as totalCured,sum(active) as totalActive,sum(deaths) as totalDeaths from district 
+where state_id = ${stateId};
+    `;
+        const dbResponse = await db.get(query);
+        const converted = convertDBObject_stats(dbResponse);
         response.send(converted);
       }
     });
