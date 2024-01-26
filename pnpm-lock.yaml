@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   bcrypt: 5.0.1
   express: 4.17.1
+  git: ^0.1.5
   jsonwebtoken: 8.5.1
   nodemon: 2.0.7
   sqlite: 4.0.19
@@ -11,6 +12,7 @@ specifiers:
 dependencies:
   bcrypt: 5.0.1
   express: 4.17.1
+  git: 0.1.5
   jsonwebtoken: 8.5.1
   nodemon: 2.0.7
   sqlite: 4.0.19
@@ -731,6 +733,13 @@ packages:
     dev: false
     optional: true
 
+  /git/0.1.5:
+    resolution: {integrity: sha512-N+bfOrXyKMU/fQtCj6D/U9MQOEN0DAA8TLHSLdUQRSWBOkeRvsjJHdrdkvcq05xO7GSDKWc3nDEGoTZ4DfCCSg==}
+    engines: {node: '>=0.4.0'}
+    dependencies:
+      mime: 1.2.9
+    dev: false
+
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -1156,6 +1165,10 @@ packages:
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.52.0
+    dev: false
+
+  /mime/1.2.9:
+    resolution: {integrity: sha512-WiLgbHTIq5AYUvU/Luli4mZ1bUcHpGNHyCsbl+KPMg4zt+XUDpQehWjuBjdLaEvDTinvKj/FgfQt3fPoT7j08g==}
     dev: false
 
   /mime/1.6.0:
